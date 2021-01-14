@@ -29,15 +29,15 @@ def borrow_book(user_id=0):
     print(list_of_books.to_string())
     pprint.pprint(rb)
     i = int(input("Select your book: "))
-    append_book("RentedBooks.csv", (user_id, list_of_books[i]['id']))
+    append_book("RentedBooks.csv", (user_id, list_of_books['id'][i]))
 
 
 def append_book(filename, appending):
-    with open(filename, 'a+', newline='') as write_obj:
+    with open(filename, 'a+', newline='\n') as write_obj:
         csv_writer = csv.writer(write_obj)
         csv_writer.writerow(appending)
         write_obj.close()
-
+2
 
 def menu():
     print("You want to \n[1] Return Book \n[2] Borrow Book? \n[3] QUIT")
