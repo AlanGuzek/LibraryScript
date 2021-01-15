@@ -5,7 +5,7 @@ import csv
 import numpy as np
 
 
-def get_books(author="Andrzej Sapkowski", kind="książka", title="Pani Jeziora", language="polski"):
+def get_books(author=None, kind="książka", title=None, language="polski"):
     url = "http://data.bn.org.pl/api/bibs.json"
     querystring = {
         "kind": kind,
@@ -21,8 +21,15 @@ def get_books(author="Andrzej Sapkowski", kind="książka", title="Pani Jeziora"
 
 
 def return_book():
-    rb = pd.read_csv("RentedBooks.csv", dtype={'Book_ID': 'Int64'})
-    # rest of code
+    print("Which one you want to return?")
+    rb = pd.read_csv("RentedBooks.csv", dtype={'Book_ID': 'Int64', 'User_ID': 'Int64'})
+    for i in range(len(rb['Book_ID'])):
+        if rb['User_ID'][i] == user_id:
+            print(f'[{i}] {rb["Title"][i]}\n')
+    i = int(input())
+    book_id = rb['Book_ID'][i]
+    pass
+    delete_book("RentedBooks.csv", book_id)
 
 
 def borrow_book():
@@ -41,7 +48,8 @@ def borrow_book():
         print(list_of_books.to_string())
         i = int(input("Select your book: "))
         book_id = int(list_of_books['id'][i])
-        append_book("RentedBooks.csv", (user_id, book_id))
+        book_title = list_of_books['title'][i]
+        append_book("RentedBooks.csv", (user_id, book_id, book_title))
 
 
 def delete_book(filename, book_id):
@@ -49,9 +57,10 @@ def delete_book(filename, book_id):
     with open(filename, 'r') as readFile:
         reader = csv.reader(readFile)
         for row in reader:
+            lines.append(row)
             for field in row:
-                if field != str(book_id):
-                    lines.append(row)
+                if field == str(book_id):
+                    lines.remove(row)
         readFile.close()
     with open(filename, 'w') as writeFile:
         writer = csv.writer(writeFile)
@@ -69,7 +78,7 @@ def append_book(filename, appending):
 
 def login():
     global user_id
-    user_id = input("Enter Your ID: ")
+    user_id = int(input("Enter Your ID: "))
 
 
 def menu():
