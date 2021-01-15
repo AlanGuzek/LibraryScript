@@ -9,7 +9,7 @@ import numpy as np
 def get_books(author="", kind="książka", title="", language="polski"):
     url = "http://data.bn.org.pl/api/bibs.json"
     querystring = {
-        "kind": kind,
+        # "kind": kind,
         "author": author,
         "title": title,
         "language": language
@@ -21,7 +21,10 @@ def get_books(author="", kind="książka", title="", language="polski"):
     r = requests.request("GET", url, params=querystring)
     books = r.json()
     books = pd.DataFrame(books['bibs'])
-    books = books[['id', 'author', 'title', 'language']]
+    try:
+        books = books[['id', 'author', 'title', 'language']]
+    except:
+        books = pd.DataFrame([])
     return books
 
 
@@ -48,21 +51,28 @@ def borrow_book():
     title = input("Type title: ")
     list_of_books = get_books(author=author, title=title)
     rb = pd.read_csv("RentedBooks.csv", dtype={'Book_ID': 'Int64'}, encoding='utf-8')
-    for i in range(len(list_of_books['id'])):
-        for na_id in rb['Book_ID'][1:]:
-            na_id = int(na_id)
-            if list_of_books['id'][i] == na_id:
-                list_of_books = list_of_books.drop(index=i)
-                break
+    try:
+        for i in range(len(list_of_books['id'])):
+            for na_id in rb['Book_ID'][1:]:
+                na_id = int(na_id)
+                if list_of_books['id'][i] == na_id:
+                    list_of_books = list_of_books.drop(index=i)
+                    break
+    except:
+        pass
     if list_of_books.empty:
         print("There are no matching books!")
     else:
-        print(list_of_books.to_string())
+        pprint.pprint(list_of_books[['author', 'title']])
         try:
-            i = int(input("Select your book: "))
-            book_id = int(list_of_books['id'][i])
-            book_title = list_of_books['title'][i]
-            append_book("RentedBooks.csv", (user_id, book_id, book_title))
+            i = input("Select your book (q to quit): ")
+            if i == 'q':
+                menu()
+            else:
+                i = int(i)
+                book_id = int(list_of_books['id'][i])
+                book_title = list_of_books['title'][i]
+                append_book("RentedBooks.csv", (user_id, book_id, book_title))
         except:
             borrow_book()
 
