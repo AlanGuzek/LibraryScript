@@ -20,30 +20,56 @@ def get_books(author="Andrzej Sapkowski", kind="książka", title="Pani Jeziora"
     return books
 
 
-def return_book(user_id=0, book_id=0):
-    pass
-
-
-def borrow_book(user_id=0):
-    list_of_books = get_books()
+def return_book():
     rb = pd.read_csv("RentedBooks.csv", dtype={'Book_ID': 'Int64'})
-    for na_id in rb['Book_ID']:
-        na_id = int(na_id)
-        for i in range(len(list_of_books['id'][1:])):
+    # rest of code
+
+
+def borrow_book():
+    author = input("Type author: ")
+    title = input("Type title: ")
+    list_of_books = get_books(author=author, title=title)
+    rb = pd.read_csv("RentedBooks.csv", dtype={'Book_ID': 'Int64'})
+    for i in range(len(list_of_books['id'])):
+        for na_id in rb['Book_ID']:
             if list_of_books['id'][i] == na_id:
-                list_of_books.drop(index=i)
+                list_of_books = list_of_books.drop(index=i)
+                break
+    if list_of_books.empty:
+        print("There are no matching books!")
+    else:
+        print(list_of_books.to_string())
+        i = int(input("Select your book: "))
+        book_id = int(list_of_books['id'][i])
+        append_book("RentedBooks.csv", (user_id, book_id))
 
-    print(list_of_books.to_string())
-    i = int(input("Select your book: "))
-    book_id = int(list_of_books['id'][i])
-    append_book("RentedBooks.csv", (user_id, book_id))
+
+def delete_book(filename, book_id):
+    lines = list()
+    with open(filename, 'r') as readFile:
+        reader = csv.reader(readFile)
+        for row in reader:
+            for field in row:
+                if field != str(book_id):
+                    lines.append(row)
+        readFile.close()
+    with open(filename, 'w') as writeFile:
+        writer = csv.writer(writeFile)
+        writer.writerows(lines)
+        writeFile.close()
 
 
+# code from internet, not my own
 def append_book(filename, appending):
     with open(filename, 'a+', newline='\n') as write_obj:
         csv_writer = csv.writer(write_obj)
         csv_writer.writerow(appending)
         write_obj.close()
+
+
+def login():
+    global user_id
+    user_id = input("Enter Your ID: ")
 
 
 def menu():
@@ -61,5 +87,6 @@ def menu():
 
 
 if __name__ == '__main__':
+    login()
     while True:
         menu()
